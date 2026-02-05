@@ -1,32 +1,55 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const publicRoutes = ["/", "/signin", "/signup"];
+// Routes that require authentication
+const protectedPaths = ["/dashboard"];
+
+// Routes only for unauthenticated users
+const authPaths = ["/signin", "/signup"];
+
+// Check if path matches any protected paths
+function isProtectedPath(pathname: string): boolean {
+  return protectedPaths.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+}
+
+// Check if path is an auth path
+function isAuthPath(pathname: string): boolean {
+  return authPaths.some((path) => pathname === path);
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1️⃣ Allow public routes
-  if (publicRoutes.includes(pathname)) {
-    return NextResponse.next();
+  // Get token from cookies (for middleware we can't access localStorage)
+  // Better Auth stores token in cookie as well
+  const token = request.cookies.get("auth_token")?.value;
+
+  // For protected routes, redirect to sign-in if no token
+  if (isProtectedPath(pathname) && !token) {
+    const signInUrl = new URL("/signin", request.url);
+    signInUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(signInUrl);
   }
 
-  // 2️⃣ Allow Next.js internals
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/favicon")
-  ) {
-    return NextResponse.next();
+  // For auth routes, redirect to dashboard if already authenticated
+  if (isAuthPath(pathname) && token) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // 3️⃣ Allow HF / serverless safe approach
-  // Middleware cannot reliably read client-side JWT in localStorage,
-  // so we just allow protected routes to load, client-side auth will block access if not signed in
   return NextResponse.next();
 }
 
-// 4️⃣ Match everything except internal Next.js paths
 export const config = {
-  matcher: ["/((?!_next|api|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder files
+     */
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

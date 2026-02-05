@@ -1,36 +1,32 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const publicRoutes = ['/', '/signin', '/signup'];
+const publicRoutes = ["/", "/signin", "/signup"];
 
 export function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+  const { pathname } = request.nextUrl;
 
-  // Allow public routes
-  if (publicRoutes.includes(pathname)) return NextResponse.next();
-
-  // Allow Next.js internals
-  if (pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname.startsWith('/favicon'))
+  // 1️⃣ Allow public routes
+  if (publicRoutes.includes(pathname)) {
     return NextResponse.next();
-
-  // Safely check cookies
-  let hasSessionCookie = false;
-  try {
-    hasSessionCookie = Boolean(request.cookies.get('authjs.session-token'));
-  } catch (err) {
-    // Edge runtime may not support .get() fully
-    hasSessionCookie = false;
   }
 
-  const hasAuthHeader = request.headers.get('authorization')?.startsWith('Bearer ') ?? false;
-  const hasValidAuth = hasSessionCookie || hasAuthHeader;
-
-  // Protect chat route example
-  if (pathname.startsWith('/chat') && !hasValidAuth) {
-    return NextResponse.redirect(new URL('/signin', request.url));
+  // 2️⃣ Allow Next.js internals
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/favicon")
+  ) {
+    return NextResponse.next();
   }
 
+  // 3️⃣ Allow HF / serverless safe approach
+  // Middleware cannot reliably read client-side JWT in localStorage,
+  // so we just allow protected routes to load, client-side auth will block access if not signed in
   return NextResponse.next();
 }
 
-export const config = { matcher: ["/((?!_next|api|favicon.ico).*)"], };
+// 4️⃣ Match everything except internal Next.js paths
+export const config = {
+  matcher: ["/((?!_next|api|favicon.ico).*)"],
+};

@@ -12,6 +12,8 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [conversation, setConversation] = useState<Conversation | null>(null);
 
+
+  
   useEffect(() => {
     if (isAuthenticated && user) {
       // Load conversation history if available

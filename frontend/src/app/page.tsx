@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/src/styling/ui/button';
+import { ChatIcon } from '@/src/components/ChatIcon';
 
 export default function LandingPage() {
   return (
@@ -158,6 +159,8 @@ export default function LandingPage() {
             </p>
           </div>
         </div>
+
+ <ChatIcon />
 
         {/* CTA Section */}
         <div className="py-20 text-center">

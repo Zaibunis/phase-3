@@ -2,27 +2,22 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Public routes that don't require authentication
-const publicRoutes = ["/", "/signin", "/signup", "/api/auth/*"];
+const publicRoutes = ['/', '/signin', '/signup'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public routes
-  if (publicRoutes.some(route =>
-    pathname === route ||
-    (route.endsWith('/*') && pathname.startsWith(route.slice(0, -2)))
-  )) {
+  if (publicRoutes.includes(pathname)) {
     return NextResponse.next();
   }
 
   // Allow static assets and Next.js internals
   if (
-    pathname.startsWith("/_next/") ||
-    pathname.startsWith("/api/") ||
-    pathname.startsWith("/favicon") ||
-    pathname.startsWith("/static/") ||
-    pathname.startsWith("/public/") ||
-    /\.(css|js|png|jpg|jpeg|gif|svg|ico|webp)$/i.test(pathname)
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/favicon') ||
+    pathname.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2)$/i)
   ) {
     return NextResponse.next();
   }
@@ -41,6 +36,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    '/((?!api|_next/static|_next/image|favicon\\.ico).*)',
   ],
 };

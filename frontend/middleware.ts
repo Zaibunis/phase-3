@@ -1,31 +1,46 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Public routes anyone can access
-const publicRoutes = ["/", "/signin", "/signup"];
+// Public routes that don't require authentication
+const publicRoutes = ["/", "/signin", "/signup", "/api/auth/*"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public pages
-  if (publicRoutes.includes(pathname)) {
+  // Allow public routes
+  if (publicRoutes.some(route =>
+    pathname === route ||
+    (route.endsWith('/*') && pathname.startsWith(route.slice(0, -2)))
+  )) {
     return NextResponse.next();
   }
 
-  // Allow Next.js internals
+  // Allow static assets and Next.js internals
   if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/favicon")
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/static/") ||
+    pathname.startsWith("/public/") ||
+    /\.(css|js|png|jpg|jpeg|gif|svg|ico|webp)$/i.test(pathname)
   ) {
     return NextResponse.next();
   }
 
-  // For all other routes (chat, dashboard), allow request
-  // Client-side auth will handle actual access
+  // For all other routes, allow request to proceed
+  // Authentication will be handled client-side in the components
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next|api|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

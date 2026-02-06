@@ -5,9 +5,22 @@
 
 import { createAuthClient } from "better-auth/client";
 
-// Create authentication client
+// Create authentication client with dynamic base URL for production
+let authBaseURL = process.env.NEXT_PUBLIC_API_URL || "https://faria45678-chat-agent.hf.space/";
+
+// In production, adjust the URL to remove /api/v1 if it's part of the NEXT_PUBLIC_API_URL
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+  if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.includes('/api/v1')) {
+    // Extract the base URL without /api/v1
+    authBaseURL = process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '');
+  } else if (!process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL === "https://faria45678-chat-agent.hf.space/") {
+    // Fallback to window origin if no env var is set
+    authBaseURL = window.location.origin;
+  }
+}
+
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  baseURL: authBaseURL,
   plugins: [],
   // ⚡ Important: Include credentials for cookies
   fetchOptions: {

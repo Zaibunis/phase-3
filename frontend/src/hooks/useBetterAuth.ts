@@ -36,10 +36,14 @@ export function useBetterAuth(): AuthContextType {
   // Direct API calls to match our backend endpoints
   const signInHandler = useCallback(async (email: string, password: string) => {
     try {
+      console.log('Attempting sign in with email:', email); // Debug logging
+      
       const response = await apiClient.post<any>(  // Changed to 'any' to handle varying response structures
         '/auth/auth/signin',
         { email, password }
       );
+
+      console.log('Sign in response:', response); // Debug logging
 
       // Try to extract token from different possible response formats
       let token = response.data.access_token || response.data.token || response.data.data?.access_token;
@@ -64,10 +68,14 @@ export function useBetterAuth(): AuthContextType {
 
   const signUpHandler = useCallback(async (email: string, password: string) => {
     try {
+      console.log('Attempting sign up with email:', email); // Debug logging
+      
       const response = await apiClient.post<any>(  // Changed to 'any' to handle varying response structures
         '/auth/auth/signup',
         { email, password }
       );
+
+      console.log('Sign up response:', response); // Debug logging
 
       // Try to extract token from different possible response formats
       let token = response.data.access_token || response.data.token || response.data.data?.access_token;
@@ -100,6 +108,7 @@ export function useBetterAuth(): AuthContextType {
       await authClient.signOut();
       router.push('/signin');
     } catch (error) {
+      console.error('Sign out error:', error); // Log for debugging
       // Even if sign out fails, redirect to sign in
       router.push('/signin');
     }

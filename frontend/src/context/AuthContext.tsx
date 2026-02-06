@@ -40,71 +40,26 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
 
   // Check for existing token on initial load and decode user info
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      const decoded = parseJwt(token);
-      if (decoded) {
-        const user: User = {
-          id: decoded.sub,
-          email: decoded.email,
-          token: token
-        };
-        setAuthState({
-          user,
-          loading: false,
-          error: null,
-          isAuthenticated: true
-        });
-      } else {
-        // Token exists but is invalid, clear it
-        localStorage.removeItem('access_token');
-        setAuthState({
-          user: null,
-          loading: false,
-          error: null,
-          isAuthenticated: false
-        });
-      }
-    } else {
-      // No token found
-      setAuthState({
-        user: null,
-        loading: false,
-        error: null,
-        isAuthenticated: false
-      });
-    }
-
-    // Listen for storage changes to detect when token is set from other tabs/components
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'access_token') {
-        const newToken = e.newValue;
-        if (newToken) {
-          const decoded = parseJwt(newToken);
-          if (decoded) {
-            const user: User = {
-              id: decoded.sub,
-              email: decoded.email,
-              token: newToken
-            };
-            setAuthState({
-              user,
-              loading: false,
-              error: null,
-              isAuthenticated: true
-            });
-          } else {
-            // Token is invalid, clear it
-            localStorage.removeItem('access_token');
-            setAuthState({
-              user: null,
-              loading: false,
-              error: null,
-              isAuthenticated: false
-            });
-          }
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        const decoded = parseJwt(token);
+        if (decoded) {
+          const user: User = {
+            id: decoded.sub,
+            email: decoded.email,
+            token: token
+          };
+          setAuthState({
+            user,
+            loading: false,
+            error: null,
+            isAuthenticated: true
+          });
         } else {
-          // Token was removed
+          // Token exists but is invalid, clear it
+          localStorage.removeItem('access_token');
           setAuthState({
             user: null,
             loading: false,
@@ -112,15 +67,63 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
             isAuthenticated: false
           });
         }
+      } else {
+        // No token found
+        setAuthState({
+          user: null,
+          loading: false,
+          error: null,
+          isAuthenticated: false
+        });
       }
-    };
 
-    window.addEventListener('storage', handleStorageChange);
+      // Listen for storage changes to detect when token is set from other tabs/components
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'access_token') {
+          const newToken = e.newValue;
+          if (newToken) {
+            const decoded = parseJwt(newToken);
+            if (decoded) {
+              const user: User = {
+                id: decoded.sub,
+                email: decoded.email,
+                token: newToken
+              };
+              setAuthState({
+                user,
+                loading: false,
+                error: null,
+                isAuthenticated: true
+              });
+            } else {
+              // Token is invalid, clear it
+              localStorage.removeItem('access_token');
+              setAuthState({
+                user: null,
+                loading: false,
+                error: null,
+                isAuthenticated: false
+              });
+            }
+          } else {
+            // Token was removed
+            setAuthState({
+              user: null,
+              loading: false,
+              error: null,
+              isAuthenticated: false
+            });
+          }
+        }
+      };
 
-    // Clean up event listener
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+      window.addEventListener('storage', handleStorageChange);
+
+      // Clean up event listener
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+      };
+    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -144,6 +147,9 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
             error: null,
             isAuthenticated: true
           });
+          
+          // Redirect after successful authentication
+          router.push('/tasks');
         } else {
           // Invalid token received
           setAuthState(prev => ({
@@ -199,6 +205,9 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
             error: null,
             isAuthenticated: true
           });
+          
+          // Redirect after successful authentication
+          router.push('/tasks');
         } else {
           // Invalid token received
           setAuthState(prev => ({

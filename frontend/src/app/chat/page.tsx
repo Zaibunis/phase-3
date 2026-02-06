@@ -65,7 +65,7 @@ export default function ChatPage() {
 
         <main className="chat-main flex-1 flex flex-col w-full overflow-hidden min-h-0">
           <div className="h-full max-w-4xl mx-auto flex flex-col">
-            {user && <ChatKitWrapper userId={user.id} domainAllowlist={["https://phase-3-six.vercel.app/", "https://hack-phase-3.vercel.app/"]} />}
+            {user && <ChatKitWrapper userId={user.id} domainAllowlist={["https://phase-3-six.vercel.app/"]} />}
           </div>
         </main>
       </div>

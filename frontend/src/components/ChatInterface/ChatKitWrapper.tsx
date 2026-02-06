@@ -6,10 +6,9 @@ import { ChatUI } from './ChatUI/page'; // Your custom ChatUI component
 
 interface ChatKitWrapperProps {
   userId: string;
-  domainAllowlist?: string[];
 }
 
-const ChatKitWrapper: React.FC<ChatKitWrapperProps> = ({ userId, domainAllowlist = [] }) => {
+const ChatKitWrapper: React.FC<ChatKitWrapperProps> = ({ userId }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,14 +20,8 @@ const ChatKitWrapper: React.FC<ChatKitWrapperProps> = ({ userId, domainAllowlist
       setError('Missing NEXT_PUBLIC_GEMINI_API_KEY');
     }
 
-    // Domain allowlist check (optional)
-    const currentDomain = window.location.hostname;
-    if (domainAllowlist.length && !domainAllowlist.includes(currentDomain)) {
-      setError(`Domain ${currentDomain} is not allowlisted`);
-    }
-
     console.log('ChatKit initialized (Gemini mode, no JWT required)');
-  }, [domainAllowlist]);
+  }, []);
 
   const handleSendMessage = async (input: string) => {
     setIsLoading(true);
@@ -81,7 +74,7 @@ const ChatKitWrapper: React.FC<ChatKitWrapperProps> = ({ userId, domainAllowlist
     if (!apiKey) throw new Error('Missing NEXT_PUBLIC_GEMINI_API_KEY');
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     const result = await model.generateContent(message);
     const response = await result.response;

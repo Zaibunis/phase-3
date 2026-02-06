@@ -12,8 +12,6 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [conversation, setConversation] = useState<Conversation | null>(null);
 
-
-  
   useEffect(() => {
     if (isAuthenticated && user) {
       // Load conversation history if available
@@ -65,7 +63,7 @@ export default function ChatPage() {
 
         <main className="chat-main flex-1 flex flex-col w-full overflow-hidden min-h-0">
           <div className="h-full max-w-4xl mx-auto flex flex-col">
-            {user && <ChatKitWrapper userId={user.id} domainAllowlist={["https://phase-3-six.vercel.app/", "https://phase-3-5vycw93yb-faria-mustaqeems-projects.vercel.app/" ,"https://phase-3-git-main-faria-mustaqeems-projects.vercel.app/"]} />}
+            {user && <ChatKitWrapper userId={user.id} />}
           </div>
         </main>
       </div>

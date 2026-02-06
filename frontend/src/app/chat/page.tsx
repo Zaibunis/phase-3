@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ChatKitWrapper from '../../components/ChatInterface/ChatKitWrapper';
 import LoadingStates from '../../components/ChatInterface/LoadingStates';
 import { useAuth } from '../../context/AuthContext';
@@ -9,8 +10,16 @@ import { Conversation } from '../../components/types/chatTypes';
 
 export default function ChatPage() {
   const { user, isAuthenticated, loading } = useAuth();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [conversation, setConversation] = useState<Conversation | null>(null);
+
+  // Redirect to sign-in page if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      router.push('/signin');
+    }
+  }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -26,19 +35,13 @@ export default function ChatPage() {
     return <LoadingStates isLoading={true} error={null} />;
   }
 
-  if (error) {
-    return <LoadingStates isLoading={false} error={error} />;
+  // Don't render anything if not authenticated, as redirect will happen
+  if (!isAuthenticated) {
+    return null;
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="chat-page">
-        <div className="authentication-required">
-          <h2>Authentication Required</h2>
-          <p>Please log in to access the chat interface.</p>
-        </div>
-      </div>
-    );
+  if (error) {
+    return <LoadingStates isLoading={false} error={error} />;
   }
 
   return (

@@ -11,11 +11,12 @@ export function ChatIcon() {
     if (loading) return;
 
     if (!isAuthenticated) {
-      router.push('/signin'); // 🔐 block access
+      router.push('/signin'); // 🔐 redirect to sign in
       return;
     }
 
-    router.push('/chat'); // ✅ allowed
+    // For the original ChatIcon, we'll still navigate to the full chat page
+    router.push('/chat');
   };
 
   return (

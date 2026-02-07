@@ -6,7 +6,6 @@ import { Button } from '@/src/styling/ui/button';
 import {
   LogOut,
   LayoutDashboard,
-  MessageSquare,
   Settings,
   Sun,
   Moon,
@@ -15,8 +14,7 @@ import { Avatar, AvatarFallback } from '@/src/styling/ui/avatar';
 import { cn } from '@/src/lib/utils';
 
 const links = [
-
-  { href: '/chat', label: 'Chat', icon: MessageSquare },
+  { href: '/tasks', label: 'Tasks', icon: LayoutDashboard },
 ];
 
 export function Sidebar() {
